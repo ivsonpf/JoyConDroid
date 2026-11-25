@@ -405,11 +405,6 @@ public class ProControllerFragment extends ControllerFragment implements View.On
 
 
     @Override
-    public void showAmiiboPicker() {
-        openFileSelectionDialog();
-    }
-
-    @Override
     public void setPlayerLights(LedState led1, LedState led2, LedState led3, LedState led4) {
         if (Objects.nonNull(getActivity())) {
             if (led1 == LedState.ON) {

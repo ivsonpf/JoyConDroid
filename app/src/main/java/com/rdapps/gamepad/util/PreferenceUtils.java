@@ -284,6 +284,17 @@ public class PreferenceUtils {
                 .apply();
     }
 
+    /**
+     * Sobrecarga que grava o nome do arquivo diretamente como String.
+     * Útil quando o arquivo é selecionado via caminho local (sem Uri do SAF).
+     */
+    public static void setAmiiboFileName(Context context, String fileName) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putString(AMIIBO_FILE_NAME, fileName)
+                .apply();
+    }
+
 
     public static void removeAmiiboFileName(Context context) {
         PreferenceManager.getDefaultSharedPreferences(context)

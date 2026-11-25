@@ -20,17 +20,21 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ImageButton;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 import com.erz.joysticklibrary.JoyStick;
+import com.rdapps.gamepad.R;
+import com.rdapps.gamepad.amiibo.LocalAmiiboPicker;
 import com.rdapps.gamepad.device.ButtonType;
 import com.rdapps.gamepad.device.JoystickType;
 import com.rdapps.gamepad.led.LedState;
@@ -81,6 +85,15 @@ public abstract class ControllerFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         this.context = context;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        View amiiboButton = view.findViewById(R.id.amiibo_button);
+        if (Objects.nonNull(amiiboButton)) {
+            amiiboButton.setOnClickListener(v -> LocalAmiiboPicker.show(this, device));
+        }
     }
 
 
@@ -447,6 +460,7 @@ public abstract class ControllerFragment extends Fragment {
     }
 
     public void showAmiiboPicker() {
+        LocalAmiiboPicker.show(this, device);
     }
 
     protected void vibrate(VibrationPattern vibrationPattern) {
@@ -480,10 +494,6 @@ public abstract class ControllerFragment extends Fragment {
         });
     }
 
-    protected void openFileSelectionDialog() {
-        openFileSelectionDialog(true);
-    }
-
     protected void openFileSelectionDialog(boolean binaryOnly) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -496,11 +506,19 @@ public abstract class ControllerFragment extends Fragment {
         if (data != null) {
             Context context = getContext();
             Uri uri = data.getData();
+            if (context == null || uri == null) {
+                return;
+            }
             try (InputStream is = context.getContentResolver().openInputStream(uri)) {
+                if (is == null) {
+                    return;
+                }
                 byte[] bytes = IOUtils.toByteArray(is);
                 PreferenceUtils.setAmiiboFileName(context, uri);
                 PreferenceUtils.setAmiiboFileUri(context, uri);
-                device.setAmiiboBytes(bytes);
+                if (device != null) {
+                    device.setAmiiboBytes(bytes);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
